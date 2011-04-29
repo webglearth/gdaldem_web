@@ -73,7 +73,8 @@ int main(int argc, char *argv[])
     while (i < argc) {
         if (strcmp(argv[i], "-help") == 0) {
             puts(USAGE);
-            return 0;
+            ret = 0;
+            goto end;
         } else if (strcmp(argv[i], "-b") == 0 && i + 1 < argc) {
             band_no = atoi(argv[i + 1]);
             i += 2;
