@@ -223,6 +223,7 @@ int main(int argc, char *argv[])
             v = 256.0f * (e - scale_min) / scale_range;
             dst_buf[0][i] = floor(v);
             dst_buf[1][i] = ((int) floor(v * 256.0f)) % 256;
+            dst_buf[2][i] = 0;
         }
 
         err = GDALDatasetRasterIO(dst, GF_Write, x, y, x_size, y_size,
