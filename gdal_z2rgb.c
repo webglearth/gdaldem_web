@@ -31,7 +31,10 @@ static char *USAGE =
     "OPTIONS: [-b band] [-co \"NAME=VALUE\"] [-nodata own|num num]\n"
     "         [-of format] [-scale min max] [-r resolution]";
 
-int main(int argc, char *argv[])
+static void calculate_buf_size(GDALDatasetH, int, int*, int*);
+
+int
+main(int argc, char *argv[])
 {
     /* options */
     char *drv_name = "gtiff";
@@ -65,6 +68,9 @@ int main(int argc, char *argv[])
     int blk_area;
     int blk_x_size;
     int blk_y_size;
+    int buf_area;
+    int buf_x_size;
+    int buf_y_size;
     int ds_x_size;
     int ds_y_size;
     int i, n, x, y;
@@ -171,8 +177,7 @@ int main(int argc, char *argv[])
         goto end;
     }
 
-    dst_band = GDALGetRasterBand(dst, 1);
-    GDALGetBlockSize(dst_band, &blk_x_size, &blk_y_size);
+    calculate_buf_size(dst, 8 << 20, &blk_x_size, &blk_y_size);
     blk_area = blk_x_size * blk_y_size;
     n_blks = ((ds_x_size + blk_x_size - 1) / blk_x_size) *
              ((ds_y_size + blk_y_size - 1) / blk_y_size);
@@ -249,5 +254,40 @@ end:
     free(src_buf);
     free(dst_buf[0]);
     return ret;
+}
+
+static void
+calculate_buf_size(GDALDatasetH ds, int max_area, int *x_size, int *y_size)
+{
+    int blk_area, blk_x_size, blk_y_size;
+    int buf_area, buf_x_size, buf_y_size;
+    int ds_x_size, ds_y_size;
+
+    ds_x_size = GDALGetRasterXSize(ds);
+    ds_y_size = GDALGetRasterYSize(ds);
+    GDALGetBlockSize(GDALGetRasterBand(ds, 1), &blk_x_size, &blk_y_size);
+
+    buf_x_size = blk_x_size;
+    buf_y_size = blk_y_size;
+    blk_area = blk_x_size * blk_y_size;
+    buf_area = blk_area;
+    while (buf_x_size < ds_x_size && buf_area + blk_area < max_area) {
+        buf_x_size += blk_x_size;
+        buf_area += blk_area;
+    }
+    if (ds_x_size < buf_x_size)
+        buf_x_size = ds_x_size;
+
+    blk_area = buf_x_size * blk_y_size;
+    buf_area = blk_area;
+    while (buf_y_size < ds_y_size && buf_area + blk_area < max_area) {
+        buf_y_size += blk_y_size;
+        buf_area += blk_area;
+    }
+    if (ds_y_size < buf_y_size)
+        buf_y_size = ds_y_size;
+
+    *x_size = buf_x_size;
+    *y_size = buf_y_size;
 }
 
