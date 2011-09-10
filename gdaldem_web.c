@@ -1,6 +1,6 @@
 
 /*
- * gdal_z2rgb
+ * gdaldem_web
  * Copyright (C) 2011 Klokan Technologies GmbH (info@klokantech.com)
  *
  * This program is free software: you can redistribute it and/or modify
@@ -27,7 +27,7 @@
 #include <gdal.h>
 
 static char *USAGE =
-    "USAGE: gdal_z2rgb -help | OPTIONS src dst\n"
+    "USAGE: gdaldem_web -help | OPTIONS src dst\n"
     "OPTIONS: [-b band] [-co \"NAME=VALUE\"] [-nodata own|num num]\n"
     "         [-of format] [-scale min max] [-r resolution]";
 
@@ -63,14 +63,10 @@ main(int argc, char *argv[])
     float n_blks;
     float scale_range;
     GDALDriverH drv;
-    GDALRasterBandH dst_band;
     GDALRasterBandH src_band;
     int blk_area;
     int blk_x_size;
     int blk_y_size;
-    int buf_area;
-    int buf_x_size;
-    int buf_y_size;
     int ds_x_size;
     int ds_y_size;
     int i, n, x, y;
