@@ -4,7 +4,7 @@ GDAL_LDFLAGS = `gdal-config --libs`
 
 CC = gcc
 CFLAGS = -Wall -Wextra -ansi -pedantic -std=c99 -O2 $(GDAL_CFLAGS)
-LDFLAGS = $(GDAL_LDFLAGS)
+LDFLAGS = $(GDAL_LDFLAGS) -lm
 
 all: gdaldem_web
 
